@@ -12,6 +12,12 @@ Transparent Marketplace addresses the growing concern of fraud in online marketp
 - **Secure Communication**: Safe interaction between marketplace participants
 - **Complaint Management**: Robust system for handling disputes and issues
 
+![image](https://github.com/user-attachments/assets/1d2dcd1a-689d-4594-b45a-23b6023169b5)
+
+![image](https://github.com/user-attachments/assets/d6af8435-ac45-4b20-bf45-742b0a82d15e)
+
+
+
 ## Core Features
 
 ### Authentication & Security
@@ -20,6 +26,11 @@ Transparent Marketplace addresses the growing concern of fraud in online marketp
 - **Deepfake Detection**: AI-powered analysis to detect manipulated videos
 - **OTP Authentication**: Secure one-time password verification via email
 - **Password Security**: Secure password hashing using industry-standard techniques
+![image](https://github.com/user-attachments/assets/71004e3b-6496-4abd-a338-b1f670548709)
+
+![image](https://github.com/user-attachments/assets/7bc8b819-188e-4669-846b-d5a08499e4a3)
+
+
 
 ### Seller Verification
 - **Identity Verification**: Multi-step process to confirm seller identity
@@ -28,12 +39,18 @@ Transparent Marketplace addresses the growing concern of fraud in online marketp
 - **Certificate Verification**: Validation of seller certificates and credentials
 - **Quality Assurance**: Review process for seller products and services
 
+![image](https://github.com/user-attachments/assets/a3fa8b53-93ed-42ea-ad6a-6bebfafbbefe)
+
+
 ### Product Management
 - **Product Certification**: Admin verification of product authenticity
 - **Detailed Listings**: Comprehensive product information and specifications
 - **Image Verification**: AI-powered image analysis for product photos
 - **Transparent Pricing**: Clear breakdown of costs and fees
 - **Inventory Management**: Real-time tracking of product availability
+
+![image](https://github.com/user-attachments/assets/1e5ca4bc-751d-42ab-9718-5b96c230e15e)
+
 
 ### Customer Features
 - **Shopping Cart**: Add, remove, and manage multiple items
@@ -42,12 +59,17 @@ Transparent Marketplace addresses the growing concern of fraud in online marketp
 - **Review System**: Rate and review purchased products
 - **Custom Search**: Find products based on various criteria
 
+![image](https://github.com/user-attachments/assets/e2d24bd9-38e1-4890-88e9-65669a41d897)
+
 ### Admin Controls
 - **Dashboard**: Comprehensive view of marketplace activity
 - **User Management**: Control over user accounts and permissions
 - **Product Verification**: Process for approving product listings
 - **Reporting Tools**: Analytics and insights on marketplace performance
 - **Complaint Resolution**: System for addressing user issues
+
+![image](https://github.com/user-attachments/assets/ce3fb5d8-52a0-4d09-a9f6-9a24f714717f)
+
 
 ## Technical Architecture
 

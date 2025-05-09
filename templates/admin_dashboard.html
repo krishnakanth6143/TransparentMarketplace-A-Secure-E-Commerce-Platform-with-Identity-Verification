@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="mb-4">Admin Dashboard</h2>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Welcome to the admin dashboard. Here you can manage products, users, and complaints.
+            </div>
+            <div class="text-end mb-3">
+                <a href="{{ url_for('create_admin') }}" class="btn btn-danger">
+                    <i class="fas fa-user-shield me-1"></i> Create Admin User
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-box fa-3x text-primary mb-3"></i>
+                    <h4>{{ products_count }}</h4>
+                    <p class="text-muted">Total Products</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h4>{{ users_count }}</h4>
+                    <p class="text-muted">Registered Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-flag fa-3x text-danger mb-3"></i>
+                    <h4>{{ complaints_count }}</h4>
+                    <p class="text-muted">Pending Complaints</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Product Verification</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_products %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Seller</th>
+                                    <th>Price</th>
+                                    <th>Date Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in pending_products %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" 
+                                             alt="{{ product.name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.seller.username if product.seller else 'Unknown' }}</td>
+                                    <td>&#8377;{{ product.price }}</td>
+                                    <td>{{ product.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('view_product', product_id=product.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin_verify_product', product_id=product.id) }}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin_dashboard_delete_product', product_id=product.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h5>No Pending Products</h5>
+                        <p class="text-muted">All products have been verified.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Reported Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if complaints %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Reported By</th>
+                                    <th>Reason</th>
+                                    <th>Date Reported</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for complaint in complaints %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ url_for('static', filename='uploads/' + complaint.product.image_path) if complaint.product else 'img/placeholder.jpg' }}" 
+                                                 alt="{{ complaint.product.name if complaint.product else 'Product' }}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            <span>{{ complaint.product.name if complaint.product else 'Unknown Product' }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ complaint.user.username if complaint.user else 'Unknown User' }}</td>
+                                    <td>{{ complaint.description[:50] }}{% if complaint.description|length > 50 %}...{% endif %}</td>
+                                    <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge {% if complaint.status == 'pending' %}bg-warning text-dark{% elif complaint.status == 'resolved' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ complaint.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('view_complaint', complaint_id=complaint.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('resolve_complaint', complaint_id=complaint.id) }}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{{ url_for('reject_complaint', complaint_id=complaint.id) }}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h5>No Complaints</h5>
+                        <p class="text-muted">There are no reported products at this time.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">User Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Verification</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">Admin</span>
+                                        {% elif user.is_seller %}
+                                            <span class="badge bg-primary">Seller</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Buyer</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>
+                                            {% if user.is_verified %}
+                                                <span class="badge bg-success me-1">Email ✓</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark me-1">Email ✗</span>
+                                            {% endif %}
+                                            
+                                            {% if user.face_verification %}
+                                                <span class="badge bg-success me-1">Face ✓</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark me-1">Face ✗</span>
+                                            {% endif %}
+                                            
+                                            {% if user.aadhaar_number %}
+                                                <span class="badge bg-success">Aadhaar ✓</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Aadhaar ✗</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('admin_view_user', user_id=user.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if not user.is_admin %}
+                                                {% if user.is_seller %}
+                                                    <a href="{{ url_for('admin_revoke_seller', user_id=user.id) }}" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-user-times"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ url_for('admin_make_seller', user_id=user.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ url_for('admin_toggle_user_status', user_id=user.id) }}" class="btn btn-sm {% if user.is_verified %}btn-danger{% else %}btn-success{% endif %}">
+                                                    <i class="fas {% if user.is_verified %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function deleteProduct(productId) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            window.location.href = '/admin/delete-product/' + productId;
+        }
+    }
+</script>
+{% endblock %}

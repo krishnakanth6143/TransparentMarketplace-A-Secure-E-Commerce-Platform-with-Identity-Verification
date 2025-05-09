@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify OTP - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Verify Your Email</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text fa-4x text-primary mb-3"></i>
+                        <p class="lead">We've sent a verification code to your email address.</p>
+                    </div>
+                    <form method="POST" action="{{ url_for('verify_otp', user_id=user_id) }}">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Enter OTP</label>
+                            <input type="text" class="form-control form-control-lg text-center" id="otp" name="otp" placeholder="Enter 6-digit code" maxlength="6" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Verify OTP</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Didn't receive the code? <a href="{{ url_for('resend_otp', user_id=user_id) }}">Resend OTP</a></p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i> The OTP is valid for 5 minutes.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

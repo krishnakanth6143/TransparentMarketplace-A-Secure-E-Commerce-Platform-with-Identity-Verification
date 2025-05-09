@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                {% if product.name == 'Premium Smartphone' %}
+                    <img src="{{ url_for('static', filename='images/products/smartphone.svg') }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: contain;">
+                {% elif product.name == 'Wireless Headphones' %}
+                    <img src="{{ url_for('static', filename='images/products/headphones.svg') }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: contain;">
+                {% elif product.name == 'Smart Watch' %}
+                    <img src="{{ url_for('static', filename='images/products/smartwatch.svg') }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: contain;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: contain;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Product Image</h5>
+                        <span class="badge-verified">
+                            <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                {% if product.name == 'Premium Smartphone' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate1.svg') }}" class="card-img-top" alt="Certificate for {{ product.name }}" style="height: 300px; object-fit: contain;">
+                {% elif product.name == 'Wireless Headphones' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate2.svg') }}" class="card-img-top" alt="Certificate for {{ product.name }}" style="height: 300px; object-fit: contain;">
+                {% elif product.name == 'Smart Watch' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate3.svg') }}" class="card-img-top" alt="Certificate for {{ product.name }}" style="height: 300px; object-fit: contain;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.certificate_path) }}" class="card-img-top" alt="Certificate for {{ product.name }}" style="height: 300px; object-fit: contain;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">Certificate of Authenticity</h5>
+                    <p class="card-text text-muted">This product has been verified by our authentication system.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ product.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p>{{ product.description }}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h5>Price</h5>
+                        <p class="fs-3 fw-bold text-primary">&#8377;{{ product.price }}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h5>Seller Information</h5>
+                        <p><i class="fas fa-user me-2"></i>{{ seller.username }}</p>
+                        <p><i class="fas fa-check-circle me-2 text-success"></i>Verified Seller</p>
+                    </div>
+                    <div class="mb-4">
+                        <h5>Verification Status</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-shield-alt fs-1 text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-1">This product has been verified by our AI authentication system.</p>
+                                <p class="mb-0 text-muted">Verified on: {{ product.created_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('buy_now', product_id=product.id) }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-bolt me-2"></i>Buy Now
+                        </a>
+                        <button class="btn btn-primary btn-lg" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                        </button>
+                        <a href="{{ url_for('report_product', product_id=product.id) }}" class="btn btn-outline-danger">
+                            <i class="fas fa-flag me-2"></i>Report Product
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="addToCartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {{ product.name }} has been added to your cart!
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                // Get product info
+                const productId = "{{ product.id }}";
+                const productName = "{{ product.name }}";
+                const productPrice = parseFloat("{{ product.price }}");
+                
+                // Determine the correct image path based on product name
+                let imagePath = "";
+                if (productName === "Premium Smartphone") {
+                    imagePath = "{{ url_for('static', filename='images/products/smartphone.svg') }}";
+                } else if (productName === "Wireless Headphones") {
+                    imagePath = "{{ url_for('static', filename='images/products/headphones.svg') }}";
+                } else if (productName === "Smart Watch") {
+                    imagePath = "{{ url_for('static', filename='images/products/smartwatch.svg') }}";
+                } else {
+                    imagePath = "{{ url_for('static', filename='uploads/' + product.image_path) }}";
+                }
+                
+                // Create product object
+                const product = {
+                    id: productId,
+                    name: productName,
+                    price: productPrice,
+                    image: imagePath
+                };
+                
+                // Dispatch custom event to add to cart
+                window.dispatchEvent(new CustomEvent('addToCart', {
+                    detail: product
+                }));
+                
+                // Show success toast
+                const toast = new bootstrap.Toast(document.getElementById('addToCartToast'));
+                toast.show();
+            });
+        }
+    });
+</script>
+{% endblock %}

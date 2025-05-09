@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Face Verification - Transparent Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    #video-container {
+        position: relative;
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    #video {
+        width: 100%;
+        border-radius: 10px;
+        background-color: #000;
+    }
+    
+    #canvas {
+        display: none;
+    }
+    
+    .capture-btn {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+    
+    .instructions {
+        background-color: #f8f9fa;
+        border-left: 4px solid #4a90e2;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .step {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+    
+    .step-number {
+        background-color: #4a90e2;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Face Verification</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Face verification helps us ensure that you are a real person and prevents fake accounts. This is especially important for sellers on our platform.
+                    </div>
+                    
+                    <div class="instructions mb-4">
+                        <h5><i class="fas fa-list-ol me-2"></i>Instructions</h5>
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div>Position your face clearly in the camera frame.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div>Ensure good lighting and remove glasses or other face coverings.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div>Follow the on-screen prompts to complete a series of facial movements.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div>Record a short video consent stating: "I [your name] consent to register on Transparent Marketplace".</div>
+                        </div>
+                    </div>
+                    
+                    <div id="video-container" class="mb-4">
+                        <video id="video" autoplay playsinline></video>
+                        <canvas id="canvas"></canvas>
+                        <button id="capture-btn" class="btn btn-danger btn-lg capture-btn" style="display: none;">
+                            <i class="fas fa-video me-2"></i>Start Recording
+                        </button>
+                    </div>
+                    
+                    <div id="controls" class="text-center">
+                        <button id="start-camera" class="btn btn-primary btn-lg">
+                            <i class="fas fa-camera me-2"></i>Start Camera
+                        </button>
+                        <button id="submit-video" class="btn btn-success btn-lg" style="display: none;">
+                            <i class="fas fa-check-circle me-2"></i>Submit Verification
+                        </button>
+                    </div>
+                    
+                    <form id="verification-form" method="POST" action="{{ url_for('verify_face') }}" enctype="multipart/form-data" style="display: none;">
+                        <input type="file" id="video-blob" name="video" accept="video/*">
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Your face data is securely processed using our advanced deepfake detection algorithms and is never shared with third parties.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const startCameraBtn = document.getElementById('start-camera');
+        const captureBtn = document.getElementById('capture-btn');
+        const submitBtn = document.getElementById('submit-video');
+        const videoContainer = document.getElementById('video-container');
+        const verificationForm = document.getElementById('verification-form');
+        const videoBlobInput = document.getElementById('video-blob');
+        
+        let stream;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isRecording = false;
+        
+        // Start camera
+        startCameraBtn.addEventListener('click', async function() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }, 
+                    audio: true 
+                });
+                videoElement.srcObject = stream;
+                startCameraBtn.style.display = 'none';
+                captureBtn.style.display = 'block';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Error accessing camera: ' + err.message);
+            }
+        });
+        
+        // Start/stop recording
+        captureBtn.addEventListener('click', function() {
+            if (!isRecording) {
+                // Start recording
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = function() {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const videoURL = URL.createObjectURL(blob);
+                    videoElement.srcObject = null;
+                    videoElement.src = videoURL;
+                    videoElement.muted = false;
+                    videoElement.play();
+                    
+                    // Create a file from the blob
+                    const videoFile = new File([blob], "face_verification.webm", { type: 'video/webm' });
+                    
+                    // Set the file to the form input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(videoFile);
+                    videoBlobInput.files = dataTransfer.files;
+                    
+                    submitBtn.style.display = 'inline-block';
+                };
+                
+                recordedChunks = [];
+                mediaRecorder.start();
+                isRecording = true;
+                captureBtn.innerHTML = '<i class="fas fa-stop-circle me-2"></i>Stop Recording';
+                captureBtn.classList.remove('btn-danger');
+                captureBtn.classList.add('btn-warning');
+                
+                // Show countdown timer
+                let countdown = 10; // 10 seconds recording
+                const timerInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown <= 0) {
+                        clearInterval(timerInterval);
+                        if (isRecording) {
+                            captureBtn.click(); // Stop recording automatically
+                        }
+                    }
+                }, 1000);
+                
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                isRecording = false;
+                captureBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Record Again';
+                captureBtn.classList.remove('btn-warning');
+                captureBtn.classList.add('btn-danger');
+                
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            }
+        });
+        
+        // Submit video
+        submitBtn.addEventListener('click', function() {
+            verificationForm.submit();
+        });
+    });
+</script>
+{% endblock %}

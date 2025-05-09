@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wishlist - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Wishlist</h1>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+        </a>
+    </div>
+    
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 wishlist-item" data-product-id="{{ product.id }}">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <button class="btn btn-sm btn-light rounded-circle remove-from-wishlist" 
+                                    data-product-id="{{ product.id }}"
+                                    title="Remove from wishlist">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="text-center p-3" style="height: 200px;">
+                            <img src="{{ product.image }}" class="img-fluid h-100" alt="{{ product.name }}" style="object-fit: contain;">
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <span class="badge bg-primary rounded-pill">₹{{ product.price }}</span>
+                            </div>
+                            <div class="rating-stars mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < product.avg_rating|int %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif i < product.avg_rating|round(0, 'ceil') and product.avg_rating|int != product.avg_rating|round(0, 'ceil') %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-1 small">{{ product.avg_rating|round(1) }}</span>
+                            </div>
+                            <p class="card-text small text-muted">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <a href="{{ url_for('view_product', product_id=product.id) }}" class="btn btn-outline-primary btn-sm">
+                                    View Details
+                                </a>
+                                <button class="btn btn-primary btn-sm add-to-cart-from-wishlist" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                </button>
+                            </div>
+                            <div class="mt-2 text-muted small">
+                                <i class="fas fa-clock me-1"></i> Added on: {{ product.added_on }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="far fa-heart text-muted mb-3" style="font-size: 4rem;"></i>
+            <h3>Your wishlist is empty</h3>
+            <p class="text-muted mb-4">Browse our products and add items to your wishlist</p>
+            <a href="{{ url_for('home') }}" class="btn btn-primary">
+                Start Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle remove from wishlist
+        const removeButtons = document.querySelectorAll('.remove-from-wishlist');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const wishlistItem = this.closest('.wishlist-item');
+                
+                // Send request to remove from wishlist
+                fetch(`/add-to-wishlist/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.status === 'removed') {
+                        // Animate removal of item
+                        wishlistItem.style.transition = 'all 0.3s ease';
+                        wishlistItem.style.opacity = '0';
+                        wishlistItem.style.transform = 'scale(0.8)';
+                        
+                        setTimeout(() => {
+                            wishlistItem.remove();
+                            
+                            // Check if wishlist is now empty
+                            const remainingItems = document.querySelectorAll('.wishlist-item');
+                            if (remainingItems.length === 0) {
+                                // Reload the page to show empty wishlist message
+                                window.location.reload();
+                            }
+                        }, 300);
+                        
+                        // Show toast notification
+                        showToast('Removed from wishlist', 'info');
+                    } else {
+                        showToast('Failed to remove from wishlist', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred', 'error');
+                });
+            });
+        });
+        
+        // Handle add to cart from wishlist
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-from-wishlist');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const productCard = this.closest('.card');
+                
+                // Get product details from the card
+                const productName = productCard.querySelector('.card-title').textContent;
+                const productPrice = parseFloat(productCard.querySelector('.badge').textContent.replace('₹', ''));
+                const productDescription = productCard.querySelector('.card-text').textContent;
+                const productImage = productCard.querySelector('img').getAttribute('src');
+                
+                // Create product object
+                const product = {
+                    id: parseInt(productId),
+                    name: productName,
+                    price: productPrice,
+                    description: productDescription,
+                    image: productImage,
+                    quantity: 1
+                };
+                
+                // Dispatch custom event to add to cart
+                const addToCartEvent = new CustomEvent('addToCart', {
+                    detail: product
+                });
+                window.dispatchEvent(addToCartEvent);
+                
+                // Show feedback
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Added';
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-cart-plus me-1"></i> Add to Cart';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-primary');
+                }, 1500);
+            });
+        });
+        
+        // Toast notification function
+        function showToast(message, type) {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast element
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'primary'}`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastEl);
+            
+            // Initialize and show toast
+            const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+            toast.show();
+            
+            // Remove toast after it's hidden
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastEl.remove();
+            });
+        }
+    });
+</script>
+{% endblock %}

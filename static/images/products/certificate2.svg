@@ -1,0 +1,10 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="50" y="50" width="200" height="200" fill="#ffffff" stroke="#4a90e2" stroke-width="2" rx="5" />
+  <text x="150" y="90" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#4a90e2">CERTIFICATE OF AUTHENTICITY</text>
+  <line x1="70" y1="100" x2="230" y2="100" stroke="#4a90e2" stroke-width="1" />
+  <text x="150" y="130" font-family="Arial" font-size="12" text-anchor="middle" fill="#555555">Wireless Headphones</text>
+  <text x="150" y="160" font-family="Arial" font-size="10" text-anchor="middle" fill="#555555">Serial: TM-WH-2025-002</text>
+  <text x="150" y="180" font-family="Arial" font-size="10" text-anchor="middle" fill="#555555">Verified: April 5, 2025</text>
+  <circle cx="220" cy="220" r="20" fill="#4a90e2" opacity="0.2" stroke="#4a90e2" stroke-width="2" />
+  <path d="M210,220 L220,230 L230,210" stroke="#4a90e2" stroke-width="2" fill="none" />
+</svg>

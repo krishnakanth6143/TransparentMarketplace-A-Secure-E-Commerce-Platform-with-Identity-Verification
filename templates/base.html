@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Transparent Marketplace{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+
+        /* Enhanced navbar styling */
+        .navbar {
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+        }
+        
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: white !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            padding: 0.2rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.95) !important;
+            padding: 0.6rem 1.2rem;
+            margin: 0 0.3rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background-color: white;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link:hover:before {
+            width: 70%;
+        }
+        
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.25);
+            color: white !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link.active:before {
+            width: 80%;
+        }
+        
+        .nav-link i {
+            margin-right: 6px;
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+        
+        .cart-icon {
+            position: relative;
+            padding-right: 1.5rem !important;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: 0;
+            right: 5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #4a90e2, #357abd);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .footer {
+            background: linear-gradient(to right, #2c3e50, #3498db);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+
+        /* User menu dropdown */
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .user-menu:hover .user-menu-content {
+            display: block;
+        }
+
+        .user-menu-item {
+            padding: 0.8rem 1.2rem;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .user-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Alert styles */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Modal styles */
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, #4a90e2, #357abd);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Enhanced Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .chatbot-header h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .chatbot-header .bot-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        
+        .chatbot-header .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4CD964;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            opacity: 0.8;
+        }
+        
+        .close-btn:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            scrollbar-width: thin;
+            scrollbar-color: #CCC #f8f9fa;
+        }
+        
+        .chatbot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chatbot-messages::-webkit-scrollbar-thumb {
+            background-color: #CCC;
+            border-radius: 3px;
+        }
+        
+        .chatbot-messages::-webkit-scrollbar-track {
+            background-color: #f8f9fa;
+        }
+        
+        .chat-message {
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+            animation: fadeInMessage 0.3s ease-out;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeInMessage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background-color: #4a90e2;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background-color: white;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .bot-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: -5px;
+            left: -10px;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .timestamp {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .chatbot-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: white;
+            align-items: center;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            margin-right: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        
+        .chatbot-input input:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.25);
+        }
+        
+        .chatbot-input button {
+            background: linear-gradient(to right, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chatbot-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .chat-toggle-btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px;
+            margin: 8px 0;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            border-bottom-left-radius: 5px;
+            max-width: 85%;
+        }
+        
+        .typing-indicator .bot-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: -5px;
+            left: -10px;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #4a90e2;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            opacity: 0.6;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .suggestions-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .suggestion-chip {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .suggestion-chip:hover {
+            background-color: rgba(74, 144, 226, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Add a welcome card for first-time users */
+        .welcome-card {
+            background: linear-gradient(135deg, #f5f7fa, #e8edf2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #4a90e2;
+        }
+        
+        .welcome-card h5 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-card p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        /* Chat notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+        
+        .notification-badge.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <i class="fas fa-handshake"></i> Transparent Marketplace
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                                    <i class="fas fa-user-shield"></i> Admin
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item user-menu">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-user-circle"></i> {{ current_user.username }}
+                            </a>
+                            <div class="user-menu-content fade-in">
+                                <a class="user-menu-item" href="{{ url_for('profile') }}">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                                <a class="user-menu-item" href="{{ url_for('my_orders') }}">
+                                    <i class="fas fa-box"></i> My Orders
+                                </a>
+                                <a class="user-menu-item" href="{{ url_for('view_wishlist') }}">
+                                    <i class="fas fa-heart"></i> My Wishlist
+                                </a>
+                                {% if current_user.is_seller %}
+                                <a class="user-menu-item" href="{{ url_for('seller_dashboard') }}">
+                                    <i class="fas fa-store"></i> Seller Dashboard
+                                </a>
+                                {% endif %}
+                                <div class="dropdown-divider"></div>
+                                <a class="user-menu-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link cart-icon" href="#" data-bs-toggle="modal" data-bs-target="#globalCartModal">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-count d-none" id="cartCount">0</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Cart Modal (Global) -->
+    <div class="modal fade" id="globalCartModal" tabindex="-1" aria-labelledby="globalCartModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="globalCartModalLabel">Shopping Cart</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItems">
+                        <!-- Cart items will be displayed here -->
+                        <div class="text-center py-4" id="emptyCartMessage">
+                            <i class="fas fa-shopping-cart text-muted" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Your Cart is Empty</h4>
+                            <p class="text-muted">Browse our verified products and add items to your cart.</p>
+                        </div>
+                        <div id="cartItemsList" class="d-none">
+                            <!-- Cart items will be added here dynamically -->
+                        </div>
+                    </div>
+                    <div id="cartSummary" class="d-none">
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Subtotal:</span>
+                            <span class="fw-bold" id="cartSubtotal">₹0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Shipping:</span>
+                            <span class="fw-bold">₹100.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tax:</span>
+                            <span class="fw-bold" id="cartTax">₹0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total:</span>
+                            <span id="cartTotal">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+                    <a href="{{ url_for('checkout') }}" class="btn btn-primary" id="checkoutBtn" disabled>Checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot UI -->
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <div>
+                <h4>Chat Support</h4>
+                <div class="bot-status">
+                    <div class="status-dot"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+            <button id="closeChatbot" class="close-btn">&times;</button>
+        </div>
+        <div id="chatMessages" class="chatbot-messages"></div>
+        <div class="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Type your message here...">
+            <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    
+    <!-- Chat toggle button -->
+    <button id="toggleChatbot" class="chat-toggle-btn">
+        <i class="fas fa-comment"></i>
+        <div class="notification-badge" id="chatNotification">1</div>
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Transparent Marketplace</h5>
+                    <p>Secure online registration with AI authentication and video consent.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('home') }}" class="text-white">Home</a></li>
+                        {% if current_user.is_authenticated %}
+                            <li><a href="{{ url_for('profile') }}" class="text-white">Profile</a></li>
+                            {% if current_user.is_seller %}
+                                <li><a href="{{ url_for('seller_dashboard') }}" class="text-white">Seller Dashboard</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li><a href="{{ url_for('login') }}" class="text-white">Login</a></li>
+                            <li><a href="{{ url_for('register') }}" class="text-white">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <p><i class="fas fa-envelope me-2"></i> support@transparentmarketplace.com</p>
+                    <p><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</p>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3 border-light">
+            <p class="text-center mb-0">&copy; 2025 Transparent Marketplace. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart items from localStorage
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            const cartCount = document.getElementById('cartCount');
+            
+            // Update cart count on page load
+            if (cartCount && cartItems.length > 0) {
+                const totalItems = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+                cartCount.textContent = totalItems;
+                cartCount.classList.remove('d-none');
+            }
+            
+            // Highlight current page in navbar
+            const currentLocation = window.location.pathname;
+            const navLinks = document.querySelectorAll('.navbar .nav-link');
+            navLinks.forEach(link => {
+                // Get the URL from the link
+                const linkPath = link.getAttribute('href');
+                // Remove any previous active classes
+                link.classList.remove('active');
+                
+                // Check if this link's URL matches the current page
+                if (linkPath === currentLocation || 
+                    (currentLocation !== '/' && linkPath !== '/' && currentLocation.includes(linkPath))) {
+                    link.classList.add('active');
+                } else if (currentLocation === '/' && linkPath === '/') {
+                    // Special case for home page
+                    link.classList.add('active');
+                }
+            });
+            
+            // Cart modal elements
+            const cartItemsList = document.getElementById('cartItemsList');
+            const emptyCartMessage = document.getElementById('emptyCartMessage');
+            const cartSummary = document.getElementById('cartSummary');
+            const cartSubtotal = document.getElementById('cartSubtotal');
+            const cartTax = document.getElementById('cartTax');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            // Update cart modal when opened
+            const cartModal = document.getElementById('globalCartModal');
+            if (cartModal) {
+                cartModal.addEventListener('show.bs.modal', function() {
+                    updateCartModal();
+                });
+            }
+            
+            // Function to update cart modal with items
+            function updateCartModal() {
+                // Clear previous items
+                cartItemsList.innerHTML = '';
+                
+                if (cartItems.length === 0) {
+                    // Show empty cart message
+                    emptyCartMessage.classList.remove('d-none');
+                    cartItemsList.classList.add('d-none');
+                    cartSummary.classList.add('d-none');
+                    checkoutBtn.setAttribute('disabled', 'disabled');
+                    checkoutBtn.classList.add('disabled');
+                    return;
+                }
+                
+                // Hide empty cart message, show items and summary
+                emptyCartMessage.classList.add('d-none');
+                cartItemsList.classList.remove('d-none');
+                cartSummary.classList.remove('d-none');
+                checkoutBtn.removeAttribute('disabled');
+                checkoutBtn.classList.remove('disabled');
+                
+                let subtotal = 0;
+                cartItems.forEach(function(item, index) {
+                    subtotal += item.price * (item.quantity || 1);
+                    
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'd-flex justify-content-between align-items-center p-3 bg-light rounded mb-3';
+                    itemElement.innerHTML = `
+                        <div>
+                            <h6 class="mb-0">${item.name}</h6>
+                            <small class="text-muted">Qty: ${item.quantity || 1}</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="fw-bold me-3">₹${(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                            <button class="btn btn-sm btn-outline-danger remove-item" data-index="${index}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsList.appendChild(itemElement);
+                    
+                    // Add event listener to remove button
+                    const removeBtn = itemElement.querySelector('.remove-item');
+                    if (removeBtn) {
+                        removeBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            removeCartItem(index);
+                        });
+                    }
+                });
+                
+                // Update totals
+                const tax = subtotal * 0.1;
+                const total = subtotal + 100 + tax; // ₹100 shipping
+                cartSubtotal.textContent = '₹' + subtotal.toFixed(2);
+                cartTax.textContent = '₹' + tax.toFixed(2);
+                cartTotal.textContent = '₹' + total.toFixed(2);
+                
+                // Update checkout URL to include all cart items
+                if (checkoutBtn && cartItems.length > 0) {
+                    const cartItemsJson = encodeURIComponent(JSON.stringify(cartItems));
+                    checkoutBtn.href = `${checkoutBtn.href.split('?')[0]}?cart_items=${cartItemsJson}`;
+                }
+            }
+            
+            // Remove item from cart
+            document.querySelectorAll('.remove-item').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const index = parseInt(button.getAttribute('data-index'));
+                    removeCartItem(index);
+                });
+            });
+            
+            function removeCartItem(index) {
+                cartItems.splice(index, 1);
+                localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                updateCartModal();
+            }
+            
+            // Fix chatbot display style initialization
+            const chatbotContainer = document.querySelector('.chatbot-container');
+            if (chatbotContainer) {
+                chatbotContainer.style.display = 'none';
+            }
+            
+            // Re-acquire all chatbot elements
+            const toggleButton = document.getElementById('toggleChatbot');
+            const closeButton = document.getElementById('closeChatbot');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendMessage');
+
+            // Make sure these elements exist before setting up event listeners
+            if (toggleButton && closeButton && chatInput && sendButton && chatMessages) {
+                const responses = {
+                    'hello': 'Hello! How can I help you today?',
+                    'hi': 'Hi there! How can I assist you?',
+                    'help': 'I can help you with:\n- Project information\n- Product information\n- Order status\n- Shipping details\n- Payment issues\n- Returns and refunds\nWhat would you like to know more about?',
+                    'about': 'Transparent Marketplace is a secure platform for authentic handmade products. We ensure transparency through:\n- Seller verification\n- Product certification\n- Face verification\n- OTP authentication\n- Secure payments\nWould you like to know more about any of these features?',
+                    'seller verification': 'Our sellers go through a strict verification process:\n- Government ID verification\n- Face verification\n- OTP authentication\nThis ensures only legitimate artisans can sell on our platform.',
+                    'face verification': 'We use advanced face verification technology to ensure the authenticity of our users. This adds an extra layer of security to prevent fraud.',
+                    'product certification': 'Each product on our platform comes with:\n- Digital certification\n- Authenticity verification by admin\n- Quality checks\nThis ensures you receive genuine handmade products.',
+                    'security': 'We prioritize security with:\n- Face verification\n- OTP authentication\n- Secure payment processing\n- Admin verification of products\n- Complaint management system',
+                    'features': 'Our key features include:\n- Verified sellers and products\n- Face verification system\n- Digital certificates\n- Secure payment processing\n- Order tracking\n- Customer support\n- Complaint management',
+                    'product': 'Our products are handmade by verified artisans. Each product comes with certification of authenticity. Would you like to know more about a specific product?',
+                    'shipping': 'We offer standard shipping (5-7 business days) for ₹100. Orders are processed within 24 hours of payment confirmation.',
+                    'payment': 'We accept all major credit/debit cards and UPI payments. All transactions are secure and encrypted.',
+                    'return': 'We have a 7-day return policy for unused items in original condition. Please contact support with your order number to initiate a return.',
+                    'refund': 'Refunds are processed within 5-7 business days after we receive and inspect the returned item.',
+                    'order': 'To check your order status, please visit the My Orders section in your account. You can track your shipment there.',
+                    'contact': 'You can reach our support team at support@transparentmarketplace.com or call us at 1800-123-4567.',
+                    'complaint': 'Our platform has a robust complaint management system. If you have any issues with a product or seller, you can:\n1. File a complaint from the product page\n2. Track complaint status in your account\n3. Get updates on resolution',
+                    'admin': 'Our admin panel features:\n- Product verification\n- Seller management\n- User verification\n- Complaint handling\nThis ensures platform integrity.',
+                    'transparency': 'We ensure transparency through:\n- Verified seller profiles\n- Product certificates\n- Face verification\n- Admin verification\n- Open feedback system',
+                    'default': 'I apologize, but I\'m not sure about that. Would you like me to connect you with our support team?'
+                };
+                
+                // Suggested questions to engage users
+                const suggestedQuestions = [
+                    'How does seller verification work?',
+                    'Tell me about product certification',
+                    'What payment methods do you accept?',
+                    'What is your return policy?',
+                    'How do I track my order?',
+                    'How can I contact support?'
+                ];
+
+                function getCurrentTime() {
+                    const now = new Date();
+                    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                function addMessage(message, isUser = false) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `chat-message ${isUser ? 'user-message' : 'bot-message'}`;
+                    
+                    // Format message with line breaks
+                    const formattedMessage = message.replace(/\n/g, '<br>');
+                    
+                    if (!isUser) {
+                        // Add bot avatar for bot messages
+                        const avatar = document.createElement('div');
+                        avatar.className = 'bot-avatar';
+                        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                        messageDiv.appendChild(avatar);
+                    }
+                    
+                    // Message content
+                    messageDiv.innerHTML += formattedMessage;
+                    
+                    chatMessages.appendChild(messageDiv);
+                    
+                    // Add timestamp occasionally (every few messages)
+                    if (chatMessages.children.length % 3 === 0) {
+                        const timestamp = document.createElement('div');
+                        timestamp.className = 'timestamp';
+                        timestamp.textContent = getCurrentTime();
+                        chatMessages.appendChild(timestamp);
+                    }
+                    
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Add suggestion chips after bot responses
+                    if (!isUser && message !== responses.default && !message.includes('Welcome to')) {
+                        addSuggestions();
+                    }
+                }
+                
+                function addSuggestions() {
+                    // Get 3 random suggestions that haven't been used recently
+                    const shuffled = [...suggestedQuestions].sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, 3);
+                    
+                    const suggestionsDiv = document.createElement('div');
+                    suggestionsDiv.className = 'suggestions-container';
+                    
+                    selected.forEach(question => {
+                        const chip = document.createElement('div');
+                        chip.className = 'suggestion-chip';
+                        chip.textContent = question;
+                        chip.addEventListener('click', () => {
+                            addMessage(question, true);
+                            processMessage(question);
+                        });
+                        suggestionsDiv.appendChild(chip);
+                    });
+                    
+                    chatMessages.appendChild(suggestionsDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+
+                function showTypingIndicator() {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'typing-indicator';
+                    indicator.innerHTML = '<div class="bot-avatar"><i class="fas fa-robot"></i></div><span></span><span></span><span></span>';
+                    chatMessages.appendChild(indicator);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    return indicator;
+                }
+
+                function processMessage(message) {
+                    const indicator = showTypingIndicator();
+                    
+                    // Simulate typing delay based on response length
+                    const baseDelay = 1000;
+                    const responseKey = Object.keys(responses).find(key => message.toLowerCase().includes(key)) || 'default';
+                    const response = responses[responseKey];
+                    const charCount = response.length;
+                    const typingDelay = Math.min(baseDelay + (charCount * 10), 3000); // Cap at 3 seconds
+                    
+                    setTimeout(() => {
+                        indicator.remove();
+                        addMessage(response);
+                    }, typingDelay);
+                }
+
+                // Show notification badge on page load
+                const chatNotification = document.getElementById('chatNotification');
+                setTimeout(() => {
+                    chatNotification.classList.add('show');
+                }, 3000);
+
+                toggleButton.addEventListener('click', () => {
+                    chatbotContainer.style.display = chatbotContainer.style.display === 'none' ? 'flex' : 'none';
+                    
+                    // Hide notification when chat opens
+                    chatNotification.classList.remove('show');
+                    
+                    if (chatbotContainer.style.display === 'flex' && chatMessages.children.length === 0) {
+                        // Add welcome card for first-time users
+                        const welcomeCard = document.createElement('div');
+                        welcomeCard.className = 'welcome-card';
+                        welcomeCard.innerHTML = `
+                            <h5>Welcome to Transparent Marketplace!</h5>
+                            <p>I'm your virtual assistant. I can help you with information about our products, ordering process, and more.</p>
+                            <p>How can I assist you today?</p>
+                        `;
+                        chatMessages.appendChild(welcomeCard);
+                        
+                        // Add initial suggestions
+                        addSuggestions();
+                        
+                        // Focus on the chat input
+                        setTimeout(() => chatInput.focus(), 300);
+                    }
+                });
+
+                closeButton.addEventListener('click', () => {
+                    chatbotContainer.style.display = 'none';
+                });
+
+                function sendMessage() {
+                    const message = chatInput.value.trim();
+                    if (message) {
+                        addMessage(message, true);
+                        chatInput.value = '';
+                        processMessage(message);
+                    }
+                }
+
+                sendButton.addEventListener('click', sendMessage);
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+
+                // Initialize chatbot display property correctly
+                chatbotContainer.style.display = 'none';
+                
+                // Automatic welcome message after 15 seconds of inactivity
+                setTimeout(() => {
+                    if (chatbotContainer.style.display === 'none' && !sessionStorage.getItem('chatPrompted')) {
+                        chatNotification.textContent = '1';
+                        chatNotification.classList.add('show');
+                        sessionStorage.setItem('chatPrompted', 'true');
+                    }
+                }, 15000);
+            } else {
+                console.error('One or more chatbot elements are missing from the DOM');
+            }
+
+            // IMPORTANT: Fixed Add to Cart functionality
+            // Global event listener for add to cart events
+            window.addEventListener('addToCart', function(event) {
+                if (!event.detail) {
+                    console.error('Add to cart event triggered without product details');
+                    return;
+                }
+                
+                const product = event.detail;
+                console.log('Adding product to cart:', product);
+                
+                // Check if product already exists in cart
+                const existingProductIndex = cartItems.findIndex(item => item.id == product.id);
+                
+                if (existingProductIndex !== -1) {
+                    // Product already exists, increase quantity
+                    if (!cartItems[existingProductIndex].quantity) {
+                        cartItems[existingProductIndex].quantity = 1; // Initialize quantity if it doesn't exist
+                    }
+                    cartItems[existingProductIndex].quantity += 1;
+                } else {
+                    // New product, add to cart with quantity 1
+                    product.quantity = 1;
+                    cartItems.push(product);
+                }
+                
+                // Save updated cart to localStorage
+                localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                
+                // Update cart count in UI
+                if (cartCount) {
+                    const totalItems = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+                    cartCount.textContent = totalItems;
+                    cartCount.classList.remove('d-none');
+                }
+                
+                // Show feedback to user
+                const cartModal = new bootstrap.Modal(document.getElementById('globalCartModal'));
+                cartModal.show();
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

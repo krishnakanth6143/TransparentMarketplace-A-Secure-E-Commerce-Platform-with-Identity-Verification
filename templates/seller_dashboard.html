@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Dashboard - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-store fa-4x text-primary"></i>
+                    </div>
+                    <h4>{{ current_user.username }}</h4>
+                    <p class="text-muted">Seller Account</p>
+                    <div class="mt-3">
+                        {% if current_user.face_verification %}
+                            <span class="badge bg-success">Face Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Face Not Verified</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="list-group shadow mb-4">
+                <a href="{{ url_for('profile') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user me-2"></i> Profile
+                </a>
+                <a href="{{ url_for('seller_dashboard') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-store me-2"></i> Seller Dashboard
+                </a>
+                <a href="{{ url_for('add_product') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-plus-circle me-2"></i> Add Product
+                </a>
+                {% if not current_user.face_verification %}
+                    <a href="{{ url_for('verify_face') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-id-card me-2"></i> Verify Face
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Seller Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Products:</span>
+                        <span class="fw-bold">{{ products|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Verified Products:</span>
+                        <span class="fw-bold">{{ products|selectattr('is_verified', 'equalto', true)|list|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Pending Verification:</span>
+                        <span class="fw-bold">{{ products|selectattr('is_verified', 'equalto', false)|list|length }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">My Products</h4>
+                    <a href="{{ url_for('add_product') }}" class="btn btn-light">
+                        <i class="fas fa-plus me-2"></i>Add New Product
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if not current_user.face_verification %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            You need to complete face verification before your products can be listed.
+                            <a href="{{ url_for('verify_face') }}" class="btn btn-sm btn-primary ms-2">Verify Now</a>
+                        </div>
+                    {% endif %}
+                    
+                    {% if products %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Date Added</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                        <tr>
+                                            <td>
+                                                <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" 
+                                                     alt="{{ product.name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                            </td>
+                                            <td>{{ product.name }}</td>
+                                            <td>₹{{ product.price }}</td>
+                                            <td>
+                                                {% if product.is_verified %}
+                                                    <span class="badge bg-success">Verified</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ product.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <a href="{{ url_for('view_product', product_id=product.id) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                            <h5>No Products Yet</h5>
+                            <p class="text-muted">You haven't added any products yet.</p>
+                            <a href="{{ url_for('add_product') }}" class="btn btn-primary mt-2">
+                                <i class="fas fa-plus me-2"></i>Add Your First Product
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Verification Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Product Verification Process</h6>
+                        <p class="mb-0">All products undergo a verification process to ensure authenticity and compliance with our marketplace standards. This typically takes 24-48 hours.</p>
+                    </div>
+                    
+                    <h6 class="mt-4">Requirements for Verification:</h6>
+                    <ul>
+                        <li>Clear product images showing all relevant details</li>
+                        <li>Valid product certificates or authenticity documents</li>
+                        <li>Accurate and detailed product descriptions</li>
+                        <li>Seller must have completed face verification</li>
+                        <li>Products must comply with our marketplace policies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

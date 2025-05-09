@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Product - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Edit Product</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price (₹)</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" value="{{ product.price }}" required>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="image" class="form-label">Product Image</label>
+                                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                                    <div class="form-text">Leave empty to keep the current image.</div>
+                                </div>
+                                <div class="mt-2">
+                                    <p>Current Image:</p>
+                                    <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" 
+                                         alt="{{ product.name }}" class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="certificate" class="form-label">Certificate</label>
+                                    <input type="file" class="form-control" id="certificate" name="certificate" accept="image/*">
+                                    <div class="form-text">Leave empty to keep the current certificate.</div>
+                                </div>
+                                <div class="mt-2">
+                                    <p>Current Certificate:</p>
+                                    <img src="{{ url_for('static', filename='uploads/' + product.certificate_path) }}" 
+                                         alt="Certificate for {{ product.name }}" class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if not current_user.is_admin %}
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> Editing this product will require re-verification by our team.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('seller_dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

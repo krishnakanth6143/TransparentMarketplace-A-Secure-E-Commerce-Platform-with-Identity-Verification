@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<!-- Product Detail Content -->
+<div class="container py-5">
+    <div class="row">
+        <!-- Product image column -->
+        <div class="col-md-5 mb-4">
+            <div class="product-image-container bg-light rounded p-4 d-flex align-items-center justify-content-center" style="height: 400px;">
+                {% if product.name == 'Premium Smartphone' %}
+                    <img src="{{ url_for('static', filename='images/products/smartphone.svg') }}" class="img-fluid product-detail-img" alt="{{ product.name }}">
+                {% elif product.name == 'Wireless Headphones' %}
+                    <img src="{{ url_for('static', filename='images/products/headphones.svg') }}" class="img-fluid product-detail-img" alt="{{ product.name }}">
+                {% elif product.name == 'Smart Watch' %}
+                    <img src="{{ url_for('static', filename='images/products/smartwatch.svg') }}" class="img-fluid product-detail-img" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" class="img-fluid product-detail-img" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Product information column -->
+        <div class="col-md-7">
+            <div class="product-details">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="product-title">{{ product.name }}</h1>
+                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> Verified</span>
+                </div>
+                
+                <!-- Star Rating Display -->
+                <div class="rating-stars mb-3">
+                    {% for i in range(5) %}
+                        {% if i < product.avg_rating|int %}
+                            <i class="fas fa-star"></i>
+                        {% elif i < product.avg_rating|round(0, 'ceil') and product.avg_rating|int != product.avg_rating|round(0, 'ceil') %}
+                            <i class="fas fa-star-half-alt"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="ms-2">{{ product.avg_rating|round(1) }} ({{ ratings|length }} reviews)</span>
+                </div>
+                
+                <div class="price-section mb-4">
+                    <span class="price-tag-large">₹{{ product.price }}</span>
+                    <span class="text-success ms-2">Free shipping</span>
+                </div>
+                
+                <div class="product-description mb-4">
+                    <h5>Description</h5>
+                    <p>{{ product.description }}</p>
+                </div>
+                
+                <div class="product-actions d-flex mb-4">
+                    <div class="quantity-selector me-3">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <div class="input-group" style="width: 130px;">
+                            <button class="btn btn-outline-secondary" type="button" id="decrease-qty"><i class="fas fa-minus"></i></button>
+                            <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="10">
+                            <button class="btn btn-outline-secondary" type="button" id="increase-qty"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-column justify-content-end">
+                        <button class="btn btn-primary btn-lg add-to-cart" id="addToCartBtn" data-product-id="{{ product.id }}">
+                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="product-actions border-top pt-3 d-flex justify-content-between">
+                    <div>
+                        <a href="{{ url_for('report_product', product_id=product.id) }}" class="btn btn-outline-danger btn-sm me-2">
+                            <i class="fas fa-flag me-1"></i> Report Problem
+                        </a>
+                    </div>
+                    <div>
+                        <!-- Add to Wishlist button -->
+                        {% if current_user.is_authenticated %}
+                        <button class="btn btn-outline-secondary btn-sm wishlist-btn" data-product-id="{{ product.id }}">
+                            <i class="far fa-heart me-1 wishlist-icon"></i> <span class="wishlist-text">Add to Wishlist</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="seller-info border rounded p-3 mb-4 mt-4">
+                    <h5><i class="fas fa-store me-2"></i>Seller Information</h5>
+                    <p class="mb-2">{{ product.seller.username }}</p>
+                    <div class="d-flex">
+                        <span class="badge bg-primary me-2"><i class="fas fa-user-check me-1"></i> Verified Seller</span>
+                        <span class="badge bg-info"><i class="fas fa-certificate me-1"></i> Certified</span>
+                    </div>
+                </div>
+                
+                <div class="product-certificates mb-4">
+                    <h5><i class="fas fa-certificate me-2"></i>Product Certification</h5>
+                    <p class="mb-2">This product has been verified by our admin team.</p>
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#certificateModal">
+                        <i class="fas fa-eye me-1"></i> View Certificate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4>Customer Reviews</h4>
+                </div>
+                <div class="card-body">
+                    {% if current_user.is_authenticated %}
+                        <div class="mb-4">
+                            <h5>Write a Review</h5>
+                            {% if user_rating %}
+                                <form method="POST" action="{{ url_for('delete_rating', product_id=product.id) }}" class="mb-3">
+                                    <p>You have already rated this product {{ user_rating.rating }}/5</p>
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete My Rating</button>
+                                </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('rate_product', product_id=product.id) }}">
+                                <div class="mb-3">
+                                    <label for="rating" class="form-label">Your Rating</label>
+                                    <select class="form-select" id="rating" name="rating" required>
+                                        <option value="">Select rating</option>
+                                        <option value="5" {% if user_rating and user_rating.rating == 5 %}selected{% endif %}>5 - Excellent</option>
+                                        <option value="4" {% if user_rating and user_rating.rating == 4 %}selected{% endif %}>4 - Good</option>
+                                        <option value="3" {% if user_rating and user_rating.rating == 3 %}selected{% endif %}>3 - Average</option>
+                                        <option value="2" {% if user_rating and user_rating.rating == 2 %}selected{% endif %}>2 - Poor</option>
+                                        <option value="1" {% if user_rating and user_rating.rating == 1 %}selected{% endif %}>1 - Very Poor</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="review" class="form-label">Your Review (Optional)</label>
+                                    <textarea class="form-control" id="review" name="review" rows="3">{{ user_rating.review if user_rating else '' }}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Please <a href="{{ url_for('login') }}">login</a> to write a review.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <h5>All Reviews</h5>
+                    {% if ratings %}
+                        {% for rating in ratings %}
+                            <div class="review-card p-3 border-bottom">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ rating.user_rating.username }}</strong>
+                                        <div class="rating-stars">
+                                            {% for i in range(5) %}
+                                                {% if i < rating.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ format_ist_time(rating.created_at) }}</small>
+                                </div>
+                                {% if rating.review %}
+                                    <p class="mt-2 mb-0">{{ rating.review }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No reviews yet. Be the first to review this product!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Modal -->
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="certificateModalLabel">Product Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                {% if product.name == 'Premium Smartphone' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate1.svg') }}" class="img-fluid" alt="Certificate">
+                {% elif product.name == 'Wireless Headphones' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate2.svg') }}" class="img-fluid" alt="Certificate">
+                {% elif product.name == 'Smart Watch' %}
+                    <img src="{{ url_for('static', filename='images/products/certificate3.svg') }}" class="img-fluid" alt="Certificate">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.certificate_path) }}" class="img-fluid" alt="Certificate">
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantity');
+        const decreaseBtn = document.getElementById('decrease-qty');
+        const increaseBtn = document.getElementById('increase-qty');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        
+        // Quantity buttons functionality
+        decreaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value < 10) {
+                quantityInput.value = value + 1;
+            }
+        });
+        
+        // Add to cart functionality
+        addToCartBtn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const quantity = parseInt(quantityInput.value);
+            
+            // Create product object
+            const product = {
+                id: parseInt(productId),
+                name: "{{ product.name }}",
+                price: {{ product.price }},
+                description: "{{ product.description|truncate(100) }}",
+                {% if product.name == 'Premium Smartphone' %}
+                    image: "{{ url_for('static', filename='images/products/smartphone.svg') }}",
+                {% elif product.name == 'Wireless Headphones' %}
+                    image: "{{ url_for('static', filename='images/products/headphones.svg') }}",
+                {% elif product.name == 'Smart Watch' %}
+                    image: "{{ url_for('static', filename='images/products/smartwatch.svg') }}",
+                {% else %}
+                    image: "{{ url_for('static', filename='uploads/' + product.image_path) }}",
+                {% endif %}
+                quantity: quantity
+            };
+            
+            console.log("Dispatching add to cart event with product:", product);
+            
+            // Dispatch custom event to add to cart
+            const addToCartEvent = new CustomEvent('addToCart', {
+                detail: product
+            });
+            window.dispatchEvent(addToCartEvent);
+            
+            // Show visual feedback
+            const originalText = addToCartBtn.innerHTML;
+            addToCartBtn.innerHTML = '<i class="fas fa-check me-2"></i> Added to Cart';
+            addToCartBtn.classList.add('btn-success');
+            addToCartBtn.classList.remove('btn-primary');
+            
+            setTimeout(() => {
+                addToCartBtn.innerHTML = originalText;
+                addToCartBtn.classList.remove('btn-success');
+                addToCartBtn.classList.add('btn-primary');
+            }, 2000);
+        });
+        
+        // Wishlist functionality
+        const wishlistBtn = document.querySelector('.wishlist-btn');
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const wishlistIcon = this.querySelector('.wishlist-icon');
+                const wishlistText = this.querySelector('.wishlist-text');
+                
+                // Send AJAX request to add/remove from wishlist
+                fetch(`/add-to-wishlist/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Toggle wishlist icon and text
+                        if (data.status === 'added') {
+                            wishlistIcon.classList.remove('far');
+                            wishlistIcon.classList.add('fas');
+                            wishlistIcon.classList.add('text-danger');
+                            wishlistText.textContent = 'Remove from Wishlist';
+                            
+                            // Show toast notification
+                            showToast('Added to wishlist!', 'success');
+                        } else {
+                            wishlistIcon.classList.remove('fas');
+                            wishlistIcon.classList.remove('text-danger');
+                            wishlistIcon.classList.add('far');
+                            wishlistText.textContent = 'Add to Wishlist';
+                            
+                            // Show toast notification
+                            showToast('Removed from wishlist', 'info');
+                        }
+                    } else {
+                        showToast('Something went wrong', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Failed to update wishlist', 'error');
+                });
+            });
+            
+            // Check if product is already in wishlist on page load
+            const productId = wishlistBtn.getAttribute('data-product-id');
+            fetch(`/check-wishlist/${productId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.in_wishlist) {
+                    const wishlistIcon = wishlistBtn.querySelector('.wishlist-icon');
+                    const wishlistText = wishlistBtn.querySelector('.wishlist-text');
+                    
+                    wishlistIcon.classList.remove('far');
+                    wishlistIcon.classList.add('fas');
+                    wishlistIcon.classList.add('text-danger');
+                    wishlistText.textContent = 'Remove from Wishlist';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking wishlist status:', error);
+            });
+        }
+        
+        // Toast notification function
+        function showToast(message, type) {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast element
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'primary'}`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastEl);
+            
+            // Initialize and show toast
+            const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+            toast.show();
+            
+            // Remove toast after it's hidden
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastEl.remove();
+            });
+        }
+    });
+</script>
+{% endblock %}

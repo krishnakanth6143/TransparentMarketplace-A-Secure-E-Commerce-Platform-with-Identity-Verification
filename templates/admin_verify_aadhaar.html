@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Aadhaar - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_view_user', user_id=user.id) }}">User Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Verify Aadhaar</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Aadhaar Verification for {{ user.username }}</h4>
+        </div>
+        <div class="card-body p-4">
+            {% if user.aadhaar_number %}
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle me-2"></i> Existing Aadhaar Information</h5>
+                    <p class="mb-0">User already has an Aadhaar number registered: <strong>{{ user.aadhaar_number[:4] }}-{{ user.aadhaar_number[4:8] }}-{{ user.aadhaar_number[8:] }}</strong></p>
+                </div>
+                <p>Updating this information will overwrite the existing Aadhaar details.</p>
+            {% endif %}
+
+            <h5 class="mb-4">Enter Aadhaar Details</h5>
+            <form method="POST" action="{{ url_for('admin_verify_aadhaar', user_id=user.id) }}">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="aadhaar_number" class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control" id="aadhaar_number" name="aadhaar_number" 
+                                   placeholder="Enter 12-digit Aadhaar number" 
+                                   value="{{ user.aadhaar_number }}" 
+                                   maxlength="12" 
+                                   pattern="[0-9]{12}" 
+                                   required>
+                            <div class="form-text text-muted">Format: 12 digits without spaces or dashes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i> Important Information</h5>
+                    <p>Please ensure that you have verified the user's identity properly before linking their Aadhaar. This action is recorded in the system logs.</p>
+                    <p class="mb-0">In a production environment, this would involve proper Aadhaar API integration and validation.</p>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check-circle me-2"></i> Verify Aadhaar
+                    </button>
+                    <a href="{{ url_for('admin_view_user', user_id=user.id) }}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times-circle me-2"></i> Cancel
+                    </a>
+                    {% if user.aadhaar_number %}
+                        <a href="{{ url_for('admin_remove_aadhaar', user_id=user.id) }}" class="btn btn-danger ms-2" 
+                           onclick="return confirm('Are you sure you want to remove the Aadhaar details for this user?');">
+                            <i class="fas fa-trash-alt me-2"></i> Remove Aadhaar
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add formatting to Aadhaar number input (visual only)
+        const aadhaarInput = document.getElementById('aadhaar_number');
+        if (aadhaarInput) {
+            aadhaarInput.addEventListener('input', function(e) {
+                // Remove any non-digit characters
+                let value = this.value.replace(/\D/g, '');
+                
+                // Limit to 12 digits
+                if (value.length > 12) {
+                    value = value.slice(0, 12);
+                }
+                
+                this.value = value;
+            });
+        }
+    });
+</script>
+{% endblock %}

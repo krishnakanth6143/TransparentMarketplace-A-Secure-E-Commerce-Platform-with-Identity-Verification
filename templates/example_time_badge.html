@@ -1,0 +1,9 @@
+<!-- Time Badge -->
+<span class="badge bg-light text-dark">
+    <i class="fas fa-clock me-1"></i>{{ format_ist_time(order.created_at) }}
+</span>
+
+<!-- For recent activities -->
+<span class="badge bg-light text-dark">
+    <i class="fas fa-clock me-1"></i>{{ format_ist_time(activity.timestamp, "%I:%M %p") }}
+</span>

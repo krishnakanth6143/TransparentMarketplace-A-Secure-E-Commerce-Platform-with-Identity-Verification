@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 fade-in" style="animation-delay: 0.1s;">
+                <span class="badge bg-primary mb-3 px-3 py-2">Trusted & Verified</span>
+                <h1 class="display-4 fw-bold mb-3">Verified Premium Products</h1>
+                <p class="lead mb-4 text-secondary">Our platform uses advanced AI authentication and video consent to ensure all sellers and products are verified for authenticity and quality.</p>
+                {% if not current_user.is_authenticated %}
+                <div class="mt-4">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2 px-4 py-2">Join Now</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4 py-2">Sign In</a>
+                </div>
+                {% endif %}
+                <div class="mt-4 d-flex align-items-center flex-wrap">
+                    <div class="d-flex align-items-center me-4 mb-2">
+                        <div class="icon-bubble me-2">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span>Secure</span>
+                    </div>
+                    <div class="d-flex align-items-center me-4 mb-2">
+                        <div class="icon-bubble me-2">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <span>Verified</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="icon-bubble me-2">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <span>Trusted</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 fade-in d-none d-lg-block" style="animation-delay: 0.3s;">
+                <div class="hero-image-container">
+                    <img src="{{ url_for('static', filename='images/banner.svg') }}" alt="Transparent Marketplace" class="img-fluid">
+                    <div class="hero-shape"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="section-header fade-in" style="animation-delay: 0.4s;">
+            <span class="badge bg-success mb-2">Trusted Products</span>
+            <h2 class="fw-bold">Verified Products</h2>
+        </div>
+        <a href="#" class="btn btn-outline-primary d-none d-md-block fade-in" style="animation-delay: 0.4s;">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    
+    {% if products %}
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-6 col-lg-4 mb-4 fade-in" style="animation-delay: {{ loop.index * 0.1 + 0.5 }}s;">
+            <div class="card product-card h-100">
+                <div class="card-badge">
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="fas fa-check-circle me-1"></i> Verified
+                    </span>
+                </div>
+                <div class="product-img-wrapper">
+                    {% if product.name == 'Premium Smartphone' %}
+                        <img src="{{ url_for('static', filename='images/products/smartphone.svg') }}" class="card-img-top" alt="{{ product.name }}">
+                    {% elif product.name == 'Wireless Headphones' %}
+                        <img src="{{ url_for('static', filename='images/products/headphones.svg') }}" class="card-img-top" alt="{{ product.name }}">
+                    {% elif product.name == 'Smart Watch' %}
+                        <img src="{{ url_for('static', filename='images/products/smartwatch.svg') }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" class="card-img-top" alt="{{ product.name }}">
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold mb-0">{{ product.name }}</h5>
+                        <span class="price-tag">₹{{ product.price }}</span>
+                    </div>
+                    
+                    <!-- Star Rating Display -->
+                    <div class="rating-stars mb-2">
+                        {% for i in range(5) %}
+                            {% if i < product.avg_rating|int %}
+                                <i class="fas fa-star"></i>
+                            {% elif i < product.avg_rating|round(0, 'ceil') and product.avg_rating|int != product.avg_rating|round(0, 'ceil') %}
+                                <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ms-1 text-muted small">{{ product.avg_rating|round(1) }}</span>
+                    </div>
+                    
+                    <p class="card-text text-muted">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="product-card-footer">
+                        <a href="{{ url_for('view_product', product_id=product.id) }}" class="btn btn-primary">
+                            <span>View Details</span>
+                            <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                        <button class="btn-cart add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-3 d-md-none">
+        <a href="#" class="btn btn-outline-primary">View All Products <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    {% else %}
+    <div class="alert alert-info fade-in" style="animation-delay: 0.6s;">
+        <i class="fas fa-info-circle me-2"></i> No verified products available at the moment.
+    </div>
+    {% endif %}
+</div>
+
+<div class="features-section py-5 mt-5">
+    <div class="container">
+        <div class="text-center mb-5 fade-in" style="animation-delay: 0.7s;">
+            <span class="badge bg-primary mb-2">Why Choose Us</span>
+            <h2 class="fw-bold">Why Choose Transparent Marketplace?</h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">Experience the safest and most trusted marketplace for authentic handmade products</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4 fade-in" style="animation-delay: 0.8s;">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                    <h4 class="mt-4 mb-3">Seller Verification</h4>
+                    <p class="text-muted">All sellers undergo rigorous verification including Aadhaar authentication and facial recognition to ensure authenticity.</p>
+                    <a href="#" class="feature-link">Learn more <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 fade-in" style="animation-delay: 0.9s;">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                    </div>
+                    <h4 class="mt-4 mb-3">Product Certification</h4>
+                    <p class="text-muted">Products are verified against seller certificates to ensure authenticity and quality before being listed on our platform.</p>
+                    <a href="#" class="feature-link">Learn more <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 fade-in" style="animation-delay: 1s;">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                    </div>
+                    <h4 class="mt-4 mb-3">24/7 Support</h4>
+                    <p class="text-muted">Our robust support system allows users to get help anytime and report suspicious products or transactions.</p>
+                    <a href="#" class="feature-link">Learn more <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="testimonial-section py-5 mt-4 fade-in" style="animation-delay: 1.1s;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary mb-2">Testimonials</span>
+            <h2 class="fw-bold">What Our Customers Say</h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">Hear from our satisfied users about their experience</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h6 class="mb-0">Priya Sharma</h6>
+                            <small class="text-muted">Loyal Customer</small>
+                        </div>
+                    </div>
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"I love the verification system. It gives me peace of mind knowing that I'm buying authentic handmade products directly from verified artisans."</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h6 class="mb-0">Rajesh Kumar</h6>
+                            <small class="text-muted">Verified Seller</small>
+                        </div>
+                    </div>
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"As a seller, the verification process was thorough but worth it. My sales have increased because customers trust the platform and the authenticity of products."</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h6 class="mb-0">Amit Patel</h6>
+                            <small class="text-muted">New Customer</small>
+                        </div>
+                    </div>
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="testimonial-text">"The customer support is excellent. When I had an issue with my order, they resolved it quickly and efficiently. Highly recommend this marketplace!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cta-section py-5 mt-4 fade-in" style="animation-delay: 1.2s;">
+    <div class="container">
+        <div class="cta-card">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <h2 class="fw-bold mb-3">Ready to experience verified shopping?</h2>
+                    <p class="mb-0">Join thousands of satisfied customers who trust our transparent marketplace.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 py-2">Get Started Today</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #f1f5fe 0%, #e2eafc 100%);
+        padding: 6rem 0;
+        position: relative;
+        overflow: hidden;
+        border-bottom: none;
+    }
+    
+    .hero-image-container {
+        position: relative;
+        padding: 20px;
+    }
+    
+    .hero-shape {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(74, 144, 226, 0.1) 0%, rgba(74, 144, 226, 0.05) 100%);
+        top: -50px;
+        right: -100px;
+        z-index: -1;
+    }
+    
+    .icon-bubble {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: rgba(74, 144, 226, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4a90e2;
+        font-size: 1rem;
+    }
+    
+    /* Section Styling */
+    .section-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Product Cards */
+    .product-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .product-img-wrapper {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        overflow: hidden;
+    }
+    
+    .product-img-wrapper img {
+        max-height: 100%;
+        object-fit: contain;
+        transition: all 0.3s ease;
+    }
+    
+    .product-card:hover .product-img-wrapper img {
+        transform: scale(1.05);
+    }
+    
+    .card-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+    }
+    
+    .price-tag {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #4a90e2;
+        background-color: rgba(74, 144, 226, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+    }
+    
+    .product-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-cart {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4a90e2;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .btn-cart:hover {
+        background-color: #4a90e2;
+        color: white;
+    }
+    
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        color: #ffc107;
+    }
+    
+    /* Features Section */
+    .features-section {
+        background-color: #f8f9fa;
+    }
+    
+    .feature-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon-wrapper {
+        position: relative;
+        margin: 0 auto;
+        width: 90px;
+        height: 90px;
+    }
+    
+    .feature-icon {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(to right, #4a90e2, #357abd);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: white;
+        font-size: 1.8rem;
+        z-index: 2;
+        box-shadow: 0 10px 20px rgba(74, 144, 226, 0.3);
+    }
+    
+    .feature-icon-wrapper:after {
+        content: '';
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background-color: rgba(74, 144, 226, 0.1);
+        top: -10px;
+        left: 0;
+        z-index: 1;
+    }
+    
+    .feature-link {
+        color: #4a90e2;
+        font-weight: 500;
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-link:hover {
+        color: #357abd;
+    }
+    
+    .feature-link:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #4a90e2;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-link:hover:after {
+        width: 100%;
+    }
+    
+    /* Testimonials */
+    .testimonial-section {
+        background-color: #ffffff;
+    }
+    
+    .testimonial-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        height: 100%;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .testimonial-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .testimonial-rating {
+        color: #ffc107;
+        margin-bottom: 1rem;
+    }
+    
+    .testimonial-text {
+        font-style: italic;
+        color: #6c757d;
+    }
+    
+    .testimonial-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        color: #6c757d;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background-color: #f8f9fa;
+    }
+    
+    .cta-card {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        border-radius: 12px;
+        padding: 3rem;
+        color: white;
+        box-shadow: 0 15px 30px rgba(74, 144, 226, 0.3);
+    }
+    
+    .cta-card .btn-light {
+        background-color: white;
+        color: #4a90e2;
+        border: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .cta-card .btn-light:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Animation */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    @media (max-width: 767.98px) {
+        .hero-section {
+            padding: 4rem 0;
+        }
+        
+        .product-img-wrapper {
+            height: 180px;
+        }
+        
+        .cta-card {
+            padding: 2rem;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Improved animation on scroll
+        const animateOnScroll = function() {
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (elementPosition < windowHeight - 50) {
+                    element.style.opacity = 1;
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        };
+        
+        // Initial check
+        animateOnScroll();
+        
+        // Check on scroll with throttling for better performance
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            if (!scrollTimeout) {
+                scrollTimeout = setTimeout(function() {
+                    animateOnScroll();
+                    scrollTimeout = null;
+                }, 10);
+            }
+        });
+        
+        // Enhanced add to cart functionality
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                
+                // Get product details from the card
+                const card = this.closest('.product-card');
+                const productName = card.querySelector('.card-title').textContent;
+                const productPrice = parseFloat(card.querySelector('.price-tag').textContent.replace('₹', ''));
+                const productDescription = card.querySelector('.card-text').textContent;
+                const productImage = card.querySelector('.card-img-top').getAttribute('src');
+                
+                // Create product object
+                const product = {
+                    id: parseInt(productId),
+                    name: productName,
+                    price: productPrice,
+                    description: productDescription,
+                    image: productImage,
+                    quantity: 1
+                };
+                
+                console.log('Dispatching add to cart event with product:', product);
+                
+                // Dispatch custom event to add to cart
+                const addToCartEvent = new CustomEvent('addToCart', {
+                    detail: product
+                });
+                window.dispatchEvent(addToCartEvent);
+                
+                // Enhanced animation feedback
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.style.backgroundColor = '#28a745';
+                this.style.color = 'white';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.style.backgroundColor = '';
+                    this.style.color = '';
+                }, 1500);
+            });
+        });
+    });
+</script>
+{% endblock %}

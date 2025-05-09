@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Product - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Add New Product</h3>
+                </div>
+                <div class="card-body">
+                    {% if not current_user.face_verification %}
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Face verification required!</strong> You need to complete face verification before adding products.
+                            <a href="{{ url_for('verify_face') }}" class="btn btn-sm btn-primary ms-2">Verify Now</a>
+                        </div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('add_product') }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required {% if not current_user.face_verification %}disabled{% endif %}>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Product Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required {% if not current_user.face_verification %}disabled{% endif %}></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price (₹)</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="0.01" required {% if not current_user.face_verification %}disabled{% endif %}>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required {% if not current_user.face_verification %}disabled{% endif %}>
+                            <div class="form-text">Upload a clear, high-quality image of your product.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="certificate" class="form-label">Product Certificate</label>
+                            <input type="file" class="form-control" id="certificate" name="certificate" required {% if not current_user.face_verification %}disabled{% endif %}>
+                            <div class="form-text">Upload a certificate of authenticity or relevant documentation for your product.</div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-4">
+                            <h6><i class="fas fa-info-circle me-2"></i>Verification Process</h6>
+                            <p class="mb-0">All products undergo a verification process to ensure authenticity. This typically takes 24-48 hours after submission.</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" {% if not current_user.face_verification %}disabled{% endif %}>
+                                <i class="fas fa-plus-circle me-2"></i>Add Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

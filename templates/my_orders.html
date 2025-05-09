@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">My Orders</h1>
+    
+    {% if orders %}
+        <div class="row">
+            {% for order in orders %}
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Order #{{ order.id }}</h5>
+                            <span class="badge bg-light text-dark"><i class="fas fa-clock me-1"></i>{{ format_ist_time(order.date) }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-3">Order Items</h6>
+                                    <div class="list-group mb-3">
+                                        {% for item in order.order_items %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <img src="{{ item.image }}" alt="{{ item.name }}" class="me-3" style="width: 50px; height: 50px; object-fit: contain;">
+                                                    <div>
+                                                        <h6 class="mb-0">{{ item.name }}</h6>
+                                                        <small class="text-muted">Qty: {{ item.quantity }} x ₹{{ item.price }}</small>
+                                                    </div>
+                                                </div>
+                                                <span class="fw-bold">₹{{ item.total }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Order Summary</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Status:</span>
+                                                <span class="badge {% if order.status == 'Cancelled' %}bg-danger{% else %}bg-success{% endif %}">{{ order.status }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total:</span>
+                                                <span class="fw-bold">₹{{ order.total }}</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ order.id }}" aria-expanded="false">
+                                                    View Details
+                                                </button>
+                                                {% if order.status != 'Delivered' and order.status != 'Cancelled' %}
+                                                <form action="{{ url_for('cancel_order', order_id=order.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                                    <button type="submit" class="btn btn-danger btn-sm w-100">Cancel Order</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="collapse mt-3" id="details-{{ order.id }}">
+                                <div class="card card-body bg-light">
+                                    <h6 class="mb-3">Order Details</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Order Date:</strong> {{ format_ist_time(order.date) }}</p>
+                                            <p class="mb-1"><strong>Order Status:</strong> <span class="badge {% if order.status == 'Cancelled' %}bg-danger{% else %}bg-success{% endif %}">{{ order.status }}</span></p>
+                                            <p class="mb-1"><strong>Order Total:</strong> ₹{{ order.total }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Items:</strong> {{ order.order_items|length }}</p>
+                                            <p class="mb-1"><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+                                            <p class="mb-1"><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p class="mb-0">You haven't placed any orders yet.</p>
+            <a href="{{ url_for('home') }}" class="btn btn-primary mt-3">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

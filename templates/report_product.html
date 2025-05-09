@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Product - Transparent Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Report Product</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your report helps us maintain the integrity of our marketplace. All reports are reviewed by our team and appropriate action will be taken.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Product Information</h5>
+                        <div class="d-flex align-items-center mt-3">
+                            <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" alt="{{ product.name }}" class="img-thumbnail me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                            <div>
+                                <h6>{{ product.name }}</h6>
+                                <p class="text-muted mb-0">Price: ${{ product.price }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('report_product', product_id=product.id) }}">
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Reason for Reporting</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Please describe why you are reporting this product..." required></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Report Category</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reportCategory" id="counterfeit" value="counterfeit" checked>
+                                <label class="form-check-label" for="counterfeit">
+                                    Counterfeit or Fake Product
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reportCategory" id="misrepresented" value="misrepresented">
+                                <label class="form-check-label" for="misrepresented">
+                                    Misrepresented Product (Description doesn't match)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reportCategory" id="prohibited" value="prohibited">
+                                <label class="form-check-label" for="prohibited">
+                                    Prohibited or Illegal Item
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reportCategory" id="other" value="other">
+                                <label class="form-check-label" for="other">
+                                    Other Issue
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="confirmReport" required>
+                            <label class="form-check-label" for="confirmReport">
+                                I confirm that this report is accurate and made in good faith.
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('view_product', product_id=product.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Product
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-flag me-2"></i>Submit Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

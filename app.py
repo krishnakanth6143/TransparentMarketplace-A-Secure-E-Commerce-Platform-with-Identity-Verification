@@ -27,9 +27,9 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER', 'krishnakanth6143@gmail.com')
-app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASSWORD', 'sdyf rpyp efou ptdj')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL_USER', 'krishnakanth6143@gmail.com')
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER', 'your_mail')
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASSWORD', 'your_password')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL_USER', 'your_mail')
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
